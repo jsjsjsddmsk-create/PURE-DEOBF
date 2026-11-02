@@ -1,0 +1,18 @@
+{
+  "name": "lua-deobfuscator-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local static-analysis workbench for Lua and Roblox Luau scripts",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "monaco-editor": "^0.52.2"
+  }
+}
