@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PURE DEOBF</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090b10;color:#f4f5f8;font:14px Arial,sans-serif}
+header{height:68px;border-bottom:1px solid #292e39;display:flex;align-items:center;justify-content:space-between;padding:0 max(18px,calc((100% - 1100px)/2))}
+.logo{font-size:19px;font-weight:900;letter-spacing:2px}.logo span{color:#9eabc0}.ready{color:#9bd9b2;font-size:12px}
+main{max-width:1100px;margin:38px auto;padding:0 18px}.tag{font-size:11px;letter-spacing:2px;color:#aab4c5}h1{font-size:38px;margin:8px 0}p{color:#969eac}
+.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.card{background:#13161d;border:1px solid #292e39;border-radius:13px;padding:18px;min-width:0}
+h2{font-size:14px;letter-spacing:1px;margin:0 0 14px}label{display:block;color:#b7bfcc;font-size:12px;margin:13px 0 7px}
+input,textarea{width:100%;background:#090b10;border:1px solid #303746;border-radius:8px;padding:12px;color:#fff;font:13px monospace}
+textarea{height:260px;resize:vertical;line-height:1.5}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+button{border:0;border-radius:8px;padding:10px 14px;background:#e7ebf2;color:#11151d;font-weight:bold;cursor:pointer}
+button.alt{background:#222834;color:#eef1f6;border:1px solid #394252}
+.metric{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #292e39}.metric strong{color:#edf1f8}
+.pill{display:inline-block;border:1px solid #3a4352;border-radius:20px;padding:4px 8px;margin:4px;font-size:11px}
+#output{white-space:pre-wrap;overflow-wrap:anywhere;background:#090b10;border:1px solid #292e39;border-radius:8px;padding:12px;min-height:90px;font:12px monospace;color:#dce1e9}
+.note{font-size:11px;color:#aaa4b4;background:#19171e;border:1px solid #39323f;padding:10px;border-radius:8px;margin-top:14px}
+#message{font-size:12px;color:#bfc8d7;margin-top:10px;min-height:18px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}h1{font-size:30px}main{margin-top:24px}}
+</style></head><body>
+<header><div class="logo">PURE <span>DEOBF</span></div><div class="ready">● SERVER READY</div></header>
+<main><div class="tag">LUA / LUAU SOURCE INSPECTION</div><h1>Analyze. Inspect. Understand.</h1><p>Static source analysis for Roblox Lua and Luau.</p>
+<div class="grid"><section class="card"><h2>SOURCE INPUT</h2>
+<label>PUBLIC RAW URL</label><input id="url" placeholder="https://example.com/script.lua">
+<div class="buttons"><button class="alt" id="fetch">FETCH SOURCE</button></div>
+<label>LUA / LUAU CODE</label><textarea id="source" placeholder="Paste Lua or Luau source code here..." spellcheck="false"></textarea>
+<div class="buttons"><button id="analyze">ANALYZE SOURCE</button><button class="alt" id="clean">CLEAN WHITESPACE</button><button class="alt" id="clear">CLEAR</button></div><div id="message"></div></section>
+<aside class="card"><h2>ANALYSIS REPORT</h2>
+<div class="metric"><span>Language</span><strong id="language">—</strong></div><div class="metric"><span>Characters</span><strong id="chars">—</strong></div><div class="metric"><span>Lines</span><strong id="lines">—</strong></div><div class="metric"><span>Score</span><strong id="score">—</strong></div><div class="metric"><span>Assessment</span><strong id="result">—</strong></div>
+<label>DETECTED INDICATORS</label><div id="indicators">Run analysis first.</div><label>OUTPUT</label><div id="output">No output yet.</div>
+<div class="buttons"><button class="alt" id="copy">COPY OUTPUT</button></div>
+<div class="note">Static analysis only. This tool does not execute code and cannot guarantee deobfuscation of MoonSec, Luraph, MoonVeil, VM or bytecode-protected scripts. Detection is heuristic.</div></aside></div></main>
+<script>
+const $=id=>document.getElementById(id),src=$("source");
+async function send(url,data){let r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)}),j=await r.json();if(!r.ok)throw Error(j.error||"Request failed");return j}
+$("fetch").onclick=async()=>{try{$("fetch").disabled=true;$("message").textContent="Fetching...";let j=await send("/api/fetch",{url:$("url").value});src.value=j.source;$("message").textContent="Fetched "+j.characters+" characters."}catch(e){$("message").textContent=e.message}finally{$("fetch").disabled=false}};
+$("analyze").onclick=async()=>{try{$("analyze").disabled=true;let j=await send("/api/analyze",{source:src.value}),a=j.analysis;$("language").textContent=a.language;$("chars").textContent=a.characters;$("lines").textContent=a.lines;$("score").textContent=a.score+"/100";$("result").textContent=a.result;$("indicators").innerHTML=a.indicators.length?a.indicators.map(x=>"<span class='pill'>"+x.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))+"</span>").join(""):"None detected";$("output").textContent=j.formatted;$("message").textContent=a.warning}catch(e){$("message").textContent=e.message}finally{$("analyze").disabled=false}};
+$("clean").onclick=()=>{src.value=src.value.replace(/\r\n?/g,"\n").split("\n").map(x=>x.replace(/[ \t]+$/,"")).join("\n");$("message").textContent="Whitespace cleanup only; source logic was not deobfuscated."};
+$("clear").onclick=()=>{src.value="";$("output").textContent="No output yet.";$("message").textContent="Cleared."};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("output").textContent);$("message").textContent="Copied."}catch{$("message").textContent="Clipboard unavailable."}};
+</script></body></html>

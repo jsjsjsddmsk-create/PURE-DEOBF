@@ -1,0 +1,10 @@
+{
+  "name": "pure-deobf-v3",
+  "version": "3.0.0",
+  "private": true,
+  "description": "PURE DEOBF - safe Lua/Luau static source analysis",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "express": "^4.21.2" }
+}
